@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -8,6 +9,7 @@ import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Data
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class User {
 

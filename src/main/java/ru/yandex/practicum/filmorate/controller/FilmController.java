@@ -18,7 +18,7 @@ public class FilmController {
 
     private final HashMap<Integer, Film> filmList;
     private int id;
-    private static final LocalDate DATE_BOUNDARY_VALUE = LocalDate.ofYearDay(1895, 273);
+    private static final LocalDate DATE_BOUNDARY_VALUE = LocalDate.ofYearDay(1895, 362);
 
     public FilmController() {
         this.filmList = new HashMap<>();
@@ -34,8 +34,8 @@ public class FilmController {
         }
 
         if (filmList.containsKey(film.getId())) {
-            log.error("Film {} already exist.", film.getName());
-            log.debug("Film AE data: {}", film);
+            log.error("Film {} already exist. Data: {}", film.getName(), film);
+
             throw new EntityAlreadyExistException("Post error, film " + film.getName() + " already exist.");
         }
 
@@ -57,8 +57,7 @@ public class FilmController {
 
         if (!filmList.containsKey(film.getId())) {
 
-            log.error("Put error, film {} does`t exist", film.getName());
-            log.debug("Film put error data: {}", film);
+            log.error("Put error, film {} does`t exist. Data: {}", film.getName(), film);
             throw new EntityAlreadyExistException("Put error, film " + film.getName() + " does`t exist.");
         }
 
