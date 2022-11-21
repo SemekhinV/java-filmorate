@@ -7,10 +7,10 @@ import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.InvalidUserBirthdayDataException;
 
+import java.time.LocalDate;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.time.LocalDate;
 
 public class UserValidationTests {
 

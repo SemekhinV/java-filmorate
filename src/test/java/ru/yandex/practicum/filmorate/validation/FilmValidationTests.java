@@ -7,9 +7,9 @@ import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.InvalidFilmReleaseDateException;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.time.LocalDate;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FilmValidationTests {
 
