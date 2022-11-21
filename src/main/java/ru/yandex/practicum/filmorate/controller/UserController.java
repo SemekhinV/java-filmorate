@@ -56,7 +56,7 @@ public class UserController {
     @PutMapping
     public User putUser(@Valid @RequestBody User user) {
 
-        if (user.getName().equals("")) {                                //Проверка на пустое имя
+        if ("".equals(user.getName())) {                                //Проверка на пустое имя
             user.setName(user.getLogin());
         }
 

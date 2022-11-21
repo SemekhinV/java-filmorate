@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.validation;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
@@ -8,6 +7,7 @@ import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.InvalidUserBirthdayDataException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
@@ -41,7 +41,7 @@ public class UserValidationTests {
     }
 
     @Test
-    void userInvalidBirthdayTest() {
+    void birthdayInFutureTest() {
 
         user = user.toBuilder().birthday(LocalDate.parse("2022-12-20")).build();
 
@@ -49,15 +49,24 @@ public class UserValidationTests {
                 InvalidUserBirthdayDataException.class,
                 () -> controller.postUser(user)
         );
+    }
 
+    @Test
+    void birthdayInNextCenturyTest() {
         user = user.toBuilder().birthday(LocalDate.parse("2122-12-20")).build();
 
         assertThrows(
                 InvalidUserBirthdayDataException.class,
                 () -> controller.postUser(user)
         );
-
-        user = user.toBuilder().birthday(LocalDate.parse("2002-12-20")).build();
     }
 
+    @Test
+    void correctBirthdayTest() {
+        user = user.toBuilder().birthday(LocalDate.parse("2002-12-20")).build();
+
+        controller.postUser(user);
+
+        assertEquals(user, controller.getUsers().get(0));
+    }
 }
