@@ -1,76 +1,87 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.InvalidFilmReleaseDateException;
 import ru.yandex.practicum.filmorate.entity.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
-import javax.validation.Valid;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class FilmController {
 
-    private final HashMap<Integer, Film> filmList;
-    private int id;
-    private static final LocalDate DATE_BOUNDARY_VALUE = LocalDate.ofYearDay(1895, 362);
-
-    public FilmController() {
-        this.filmList = new HashMap<>();
-        this.id = 0;
-    }
+    private final FilmService service;
 
     @PostMapping()
-    public Film postFilm(@Valid @RequestBody Film film) {
-
-        if (film.getReleaseDate().isBefore(DATE_BOUNDARY_VALUE)) {
-            log.error("Invalid release date");
-            throw new InvalidFilmReleaseDateException("Invalid release date");
-        }
-
-        if (filmList.containsKey(film.getId())) {
-            log.error("Film {} already exist. Data: {}", film.getName(), film);
-
-            throw new EntityAlreadyExistException("Post error, film " + film.getName() + " already exist.");
-        }
+    public Film postFilm(@RequestBody Film film) {
 
         log.info("Post new film - {}", film.getName());                 //Логирование
         log.debug("Post film data: {}", film);
 
-        film = film.toBuilder().id(++id).build();
+        return service.addData(film);
+    }
 
-        filmList.put(film.getId(), film);
-        return film;
+    @GetMapping("/{filmId}")
+    public Film getFilmById(@PathVariable int filmId) {
+
+        log.debug("Запрос на получение данных фильма с id = {}", filmId);
+        return service.getData(filmId);
+    }
+
+    @DeleteMapping
+    public Film deleteFilmById(@RequestBody Film film) {
+
+        log.debug("Удаление фильма filmId = {}, filmData = {}", film.getId(), film);
+
+        return service.removeData(film);
     }
 
     @PutMapping()
-    public Film putFilm(@Valid @RequestBody Film film) {
-
-        if (film.getReleaseDate().isBefore(DATE_BOUNDARY_VALUE)) {
-            throw new InvalidFilmReleaseDateException("Invalid release date");
-        }
-
-        if (!filmList.containsKey(film.getId())) {
-
-            log.error("Put error, film {} does`t exist. Data: {}", film.getName(), film);
-            throw new EntityAlreadyExistException("Put error, film " + film.getName() + " does`t exist.");
-        }
+    public Film putFilm(@RequestBody Film film) {
 
         log.info("Put new film - {}", film.getName());                 //Логирование
         log.debug("Put film data: {}", film);
 
-        filmList.put(film.getId(), film);
-
-        return film;
+        return service.updateData(film);
     }
 
     @GetMapping
-    public ArrayList<Film> getFilms() {
-        return new ArrayList<>(filmList.values());
+    public Collection<Film> getFilms() {
+        return service.getAll().values();
     }
+
+    @PutMapping("{id}/like/{userId}")
+    public void addLikeToFilm(@PathVariable("id") int filmId, @PathVariable int userId) {
+
+        service.addLike(filmId, userId);
+
+        log.info("Добавлен новый лайк");
+        log.debug("Фильму id = {} добавлен лайк от пользователя userId = {}", filmId, userId);
+    }
+
+    @DeleteMapping("{id}/like/{userId}")
+    public void removeLikeToFilm(@PathVariable("id") int filmId, @PathVariable int userId) {
+
+        service.removeLike(filmId, userId);
+
+        log.info("Произошло удаление лайка");
+        log.debug("Фильму id = {} был удален лайк от пользователя userId = {}", filmId, userId);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getPopularFilm(@RequestParam(defaultValue = "10") int count) {
+
+        log.info("Был выведен список {} наиболее популярных фильмов", count);
+
+        return service.getPopularFilms(count);
+    }
+
+
 }
