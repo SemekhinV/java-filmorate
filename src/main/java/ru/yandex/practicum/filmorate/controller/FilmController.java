@@ -22,8 +22,7 @@ public class FilmController {
     @PostMapping()
     public Film postFilm(@RequestBody Film film) {
 
-        log.info("Post new film - {}", film.getName());                 //Логирование
-        log.debug("Post film data: {}", film);
+        log.info("Post new film - {}", film);                 //Логирование
 
         return service.addData(film);
     }
@@ -31,14 +30,14 @@ public class FilmController {
     @GetMapping("/{filmId}")
     public Film getFilmById(@PathVariable int filmId) {
 
-        log.debug("Запрос на получение данных фильма с id = {}", filmId);
+        log.info("Запрос на получение данных фильма с id = {}", filmId);
         return service.getData(filmId);
     }
 
     @DeleteMapping
     public Film deleteFilmById(@RequestBody Film film) {
 
-        log.debug("Удаление фильма filmId = {}, filmData = {}", film.getId(), film);
+        log.info("Удаление фильма filmId = {}, filmData = {}", film.getId(), film);
 
         return service.removeData(film);
     }
@@ -46,8 +45,7 @@ public class FilmController {
     @PutMapping()
     public Film putFilm(@RequestBody Film film) {
 
-        log.info("Put new film - {}", film.getName());                 //Логирование
-        log.debug("Put film data: {}", film);
+        log.info("Put new film - {}", film);                 //Логирование
 
         return service.updateData(film);
     }
@@ -62,8 +60,7 @@ public class FilmController {
 
         service.addLike(filmId, userId);
 
-        log.info("Добавлен новый лайк");
-        log.debug("Фильму id = {} добавлен лайк от пользователя userId = {}", filmId, userId);
+        log.info("Фильму id = {} добавлен лайк от пользователя userId = {}", filmId, userId);
     }
 
     @DeleteMapping("{id}/like/{userId}")
@@ -71,8 +68,7 @@ public class FilmController {
 
         service.removeLike(filmId, userId);
 
-        log.info("Произошло удаление лайка");
-        log.debug("Фильму id = {} был удален лайк от пользователя userId = {}", filmId, userId);
+        log.info("Фильму id = {} был удален лайк от пользователя userId = {}", filmId, userId);
     }
 
     @GetMapping("/popular")

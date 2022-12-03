@@ -18,32 +18,61 @@ public class UserService implements ServicePattern<User> {
 
     private final InMemoryUserStorage userStorage;
 
-    private void isIdValid(int userId, int otherId) {
-        if (!userStorage.getAll().containsKey(otherId)) {
-            throw new EntityExistException("Ошибка добавления в друзья, пользователя с id = "
-                    + otherId + " не существует");
+    private void isUserValid(User user, String flag) {
+
+        if ("".equals(user.getName())) {
+            user.setName(user.getLogin());
         }
 
-        if (!userStorage.getAll().containsKey(userId)) {
-            throw new EntityExistException("Ошибка добавления в друзья, пользователя с id = "
-                    + userId + " не существует");
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            throw new InvalidValueException("Некорректная дата рождения пользователя.");
+        }
+
+        switch (flag) {
+            case "add" -> {
+                if (userStorage.getAll().containsValue(user)) {
+                    throw new EntityExistException("Ошибка получения данных пользователя, запись с id = "
+                            + user.getId() + " уже существует");
+                }
+            }
+            case "update" -> {
+                if (!userStorage.getAll().containsKey(user.getId())) {
+                    throw new EntityExistException("Ошибка получения данных пользователя, запись с id = " + user.getId()
+                            + " не найдена");
+                }
+            }
         }
     }
+
+    private void isIdValid(int userId, int otherId, String flag) {
+
+        switch (flag) {
+
+            case "likes" -> {
+                if (!userStorage.getAll().containsKey(otherId)) {
+                    throw new EntityExistException("Ошибка добавления в друзья, пользователя с id = "
+                            + otherId + " не существует");
+                }
+
+                if (!userStorage.getAll().containsKey(userId)) {
+                    throw new EntityExistException("Ошибка добавления в друзья, пользователя с id = "
+                            + userId + " не существует");
+                }
+            }
+
+            case "isUserExist" -> {
+                if (!userStorage.getAll().containsKey(userId)) {
+                    throw new EntityExistException("Ошибка получения данных пользователя, запись с id = " + userId + " не найдена");
+                }
+            }
+        }
+    }
+
 
     @Override
     public User addData(User user) {
 
-        if ("".equals(user.getName())) {                                //Проверка на пустое имя
-            user.setName(user.getLogin());
-        }
-
-        if (user.getBirthday().isAfter(LocalDate.now())) {              //Проверка даты дня рождения
-            throw new InvalidValueException("Invalid birthday data.");
-        }
-
-        if (userStorage.getAll().containsValue(user)) {          //Проверка на существования записи
-            throw new EntityExistException("Post error, user " + user.getLogin() + " already exist.");
-        }
+        isUserValid(user, "add");
 
         return userStorage.addEntity(user);
     }
@@ -51,17 +80,7 @@ public class UserService implements ServicePattern<User> {
     @Override
     public User updateData(User user) {
 
-        if ("".equals(user.getName())) {                                //Проверка на пустое имя
-            user.setName(user.getLogin());
-        }
-
-        if (user.getBirthday().isAfter(LocalDate.now())) {              //Проверка даты дня рождения
-            throw new InvalidValueException("Invalid birthday data.");
-        }
-
-        if (!userStorage.getAll().containsKey(user.getId())) {          //Проверка на существования записи
-            throw new EntityExistException("Put error, user " + user.getLogin() + " does`t exist.");
-        }
+        isUserValid(user, "update");
 
         return userStorage.updateEntity(user);
     }
@@ -70,9 +89,7 @@ public class UserService implements ServicePattern<User> {
     @Override
     public User getData(int id) {
 
-        if (!userStorage.getAll().containsKey(id)) {
-            throw new EntityExistException("Ошибка получения данных пользователя, запись с id = " + id + " не найдена");
-        }
+        isIdValid(id, 0, "isUserExist");
 
         return userStorage.getEntity(id);
     }
@@ -80,9 +97,7 @@ public class UserService implements ServicePattern<User> {
     @Override
     public User removeData(User user) {
 
-        if (!userStorage.getAll().containsKey(user.getId())) {          //Проверка на существования записи
-            throw new EntityExistException("Delete error, user " + user.getLogin() + " does`t exist.");
-        }
+        isIdValid(user.getId(), 0, "isUserExist");
 
         return userStorage.removeEntity(user);
     }
@@ -94,7 +109,7 @@ public class UserService implements ServicePattern<User> {
 
     public void addFriend(int userId, int friendId) {
 
-        isIdValid(userId, friendId);
+        isIdValid(userId, friendId, "likes");
 
         userStorage.getAll().get(userId).getFriends().add(friendId);
         userStorage.getAll().get(friendId).getFriends().add(userId);
@@ -102,7 +117,7 @@ public class UserService implements ServicePattern<User> {
 
     public void removeFriend(int userId, int friendId) {
 
-        isIdValid(userId, friendId);
+        isIdValid(userId, friendId, "likes");
 
         userStorage.getAll().get(userId).getFriends().remove(friendId);
         userStorage.getAll().get(friendId).getFriends().remove(userId);
@@ -118,7 +133,7 @@ public class UserService implements ServicePattern<User> {
 
     public List<User> getMutualFriends(int userId, int otherId) {
 
-        isIdValid(userId, otherId);
+        isIdValid(userId, otherId, "likes");
 
         return userStorage                                          //Сначала фильтруем общих друзей, путем сравнивания
                 .getEntity(userId)                                  //Списков друзей через предикат и метод .filter

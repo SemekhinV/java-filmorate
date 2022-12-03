@@ -22,18 +22,15 @@ public class UserController {
     @PostMapping
     public User postUser(@Valid @RequestBody User user) {
 
-        log.info("Post new user - {}", user.getLogin());                //Логирование
-        log.debug("Post user data: {}", user);                          //По логике работы логера конкатенация будет
-        //Вызвана только при указании уровня логирования
-        //Debug, что уменьшит нагрузку на систему
+        log.info("Post new user - {}", user);                //Логирование
+
         return service.addData(user);
     }
 
     @PutMapping
     public User putUser(@Valid @RequestBody User user) {
 
-        log.info("Put new user - {}", user.getLogin());                  //Логирование
-        log.debug("Put user data: {}", user);
+        log.info("Put new user - {}", user);                  //Логирование
 
         return service.updateData(user);
     }
@@ -46,14 +43,14 @@ public class UserController {
     @GetMapping("/{userId}")
     public User getUserById(@PathVariable int userId) {
 
-        log.debug("Запрос на получение данных пользователя с id = {}", userId);
+        log.info("Запрос на получение данных пользователя с id = {}", userId);
         return service.getData(userId);
     }
 
     @DeleteMapping
     public User deleteFilmById(@Valid @RequestBody User user) {
 
-        log.debug("Удаление пользователя userId = {}, userData = {}", user.getId(), user);
+        log.info("Удаление пользователя userId = {}, userData = {}", user.getId(), user);
 
         return service.removeData(user);
     }
@@ -61,8 +58,7 @@ public class UserController {
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable("id") int userId, @PathVariable int friendId) {
 
-        log.info("Новая заявка на добавления в друзья");
-        log.debug("Пользователю userId = {} добавлен новый друг с friendId = {}", userId, friendId);
+        log.info("Пользователю userId = {} добавлен новый друг с friendId = {}", userId, friendId);
 
         service.addFriend(userId, friendId);
     }
@@ -70,8 +66,7 @@ public class UserController {
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable("id") int userId, @PathVariable int friendId) {
 
-        log.info("Пользователь удалил своего друга.");
-        log.debug("У пользователя userId = {} был удален друг с friendId = {}", userId, friendId);
+        log.info("У пользователя userId = {} был удален друг с friendId = {}", userId, friendId);
 
         service.removeFriend(userId, friendId);
     }
@@ -79,8 +74,7 @@ public class UserController {
     @GetMapping("/{id}/friends")
     public List<User> getUserFriends(@PathVariable("id") int userId) {
 
-        log.info("Запрос на отображение списка друзей");
-        log.debug("Запрос списка друзей у пользователя userId = {}", userId);
+        log.info("Запрос списка друзей у пользователя userId = {}", userId);
 
         return service.getFriends(userId);
     }
@@ -88,8 +82,7 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     private List<User> getMutualFriends(@PathVariable("id") int userId, @PathVariable int otherId) {
 
-        log.info("Запрос на отображение списка общих друзей");
-        log.debug("Пользователь userId = {} отправил запрос на отображение списка общих друзей с otherId = {}",
+        log.info("Пользователь userId = {} отправил запрос на отображение списка общих друзей с otherId = {}",
                 userId, otherId);
 
         return service.getMutualFriends(userId, otherId);

@@ -20,21 +20,62 @@ import java.util.stream.Collectors;
 @Validated
 public class FilmService implements ServicePattern<Film> {
 
-    private static final LocalDate DATE_BOUNDARY_VALUE = LocalDate.ofYearDay(1895, 362);
+    private static final LocalDate DATE_BOUNDARY_VALUE = LocalDate.of(1895, 12, 28);
 
     private final InMemoryFilmStorage storage;
 
-    @Override
-    public Film addData(@Valid Film film) {
+    private void isValid(Film film, String flag) {
 
         if (film.getReleaseDate().isBefore(DATE_BOUNDARY_VALUE)) {
             throw new InvalidValueException("Invalid release date");
         }
 
-        if (storage.getAll().containsValue(film)) {
+        switch (flag) {
 
-            throw new EntityExistException("Post error, film " + film.getName() + " already exist.");
+            case "add" -> {
+                if (storage.getAll().containsValue(film)) {
+
+                    throw new EntityExistException("Post error, film " + film.getName() + " already exist.");
+                }
+            }
+            case "with ID" -> {
+                if (storage.getAll().isEmpty() || !storage.getAll().containsKey(film.getId())) {
+                    throw new EntityExistException("Ошибка обработки фильма фильма, запись с id = "
+                            + film.getId() + " не существует.");
+                }
+            }
         }
+    }
+
+    private void isLikeOpValid(int userId, int filmId, String flag) {
+
+        if (userId < 0 ) {
+            throw new InvalidValueException("Ошибка добавление лайка, некорректный ID.");
+        }
+
+        if (!storage.getAll().containsKey(filmId)) {
+            throw new EntityExistException("Ошибка добавления лайка фильму, фильм с id = " + filmId + " не найден.");
+        }
+
+        switch (flag) {
+            case "remove" -> {
+                if (!storage.getEntity(filmId).getLikes().contains(userId)) {
+                    throw new EntityExistException("Ошибка уделания лайка," +
+                            " пользователь с id = " + userId + " не оценивал фильм.");
+                }
+            }
+            case "add" -> {
+                if (storage.getEntity(filmId).getLikes().contains(userId)) {
+                    throw new EntityExistException("Ошибка добавления лайка, пользователь может оценить фильм только один раз");
+                }
+            }
+        }
+    }
+
+    @Override
+    public Film addData(@Valid Film film) {
+
+        isValid(film, "add");
 
         return storage.addEntity(film);
     }
@@ -52,14 +93,7 @@ public class FilmService implements ServicePattern<Film> {
     @Override
     public Film updateData(@Valid Film film) {
 
-        if (film.getReleaseDate().isBefore(DATE_BOUNDARY_VALUE)) {
-            throw new InvalidValueException("Invalid release date");
-        }
-
-        if (storage.getAll().isEmpty() || !storage.getAll().containsKey(film.getId())) {
-            throw new EntityExistException("Ошибка обновления фильма, запись с id = "
-                    + film.getId() + " не существует.");
-        }
+        isValid(film, "with ID");
 
         return storage.updateEntity(film);
     }
@@ -67,14 +101,7 @@ public class FilmService implements ServicePattern<Film> {
     @Override
     public Film removeData(@Valid Film film) {
 
-        if (film.getReleaseDate().isBefore(DATE_BOUNDARY_VALUE)) {
-            throw new InvalidValueException("Invalid release date");
-        }
-
-        if (storage.getAll().isEmpty() || !storage.getAll().containsKey(film.getId())) {
-            throw new EntityExistException("Ошибка удаления фильма, записи с id = "
-                    + film.getId() + " не существует.");
-        }
+        isValid(film, "with ID");
 
         return storage.removeEntity(film);
     }
@@ -87,35 +114,14 @@ public class FilmService implements ServicePattern<Film> {
 
     public void addLike(int filmId, int userId) {
 
-        if (userId < 0 || userId > 1000) {
-            throw new InvalidValueException("Ошибка добавление лайка, некорректный ID.");
-        }
-
-        if (!storage.getAll().containsKey(filmId)) {
-            throw new EntityExistException("Ошибка добавления лайка фильму, фильм с id = " + filmId + " не найден.");
-        }
-
-        if (storage.getEntity(filmId).getLikes().contains(userId)) {
-            throw new EntityExistException("Ошибка добавления лайка, пользователь может оценить фильм только один раз");
-        }
+        isLikeOpValid(userId, filmId, "add");
 
         storage.getEntity(filmId).getLikes().add(userId);
     }
 
     public void removeLike(int filmId, int userId) {
 
-        if (userId < 0 || userId > 1000) {
-            throw new InvalidValueException("Ошибка добавление лайка, некорректный ID.");
-        }
-
-        if (!storage.getAll().containsKey(filmId)) {
-            throw new EntityExistException("Ошибка добавления лайка фильму, фильм с id = " + filmId + " не найден.");
-        }
-
-        if (!storage.getEntity(filmId).getLikes().contains(userId)) {
-            throw new EntityExistException("Ошибка уделания лайка," +
-                    " пользователь с id = " + userId + " не оценивал фильм.");
-        }
+        isLikeOpValid(userId, filmId, "remove");
 
         storage.getEntity(filmId).getLikes().remove(userId);
     }
