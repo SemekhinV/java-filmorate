@@ -29,17 +29,19 @@ public class UserService implements ServicePattern<User> {
         }
 
         switch (flag) {
-            case "add" -> {
+            case "add" : {
                 if (userStorage.getAll().containsValue(user)) {
                     throw new EntityExistException("Ошибка получения данных пользователя, запись с id = "
                             + user.getId() + " уже существует");
                 }
+                break;
             }
-            case "update" -> {
+            case "update" : {
                 if (!userStorage.getAll().containsKey(user.getId())) {
                     throw new EntityExistException("Ошибка получения данных пользователя, запись с id = " + user.getId()
                             + " не найдена");
                 }
+                break;
             }
         }
     }
@@ -48,7 +50,7 @@ public class UserService implements ServicePattern<User> {
 
         switch (flag) {
 
-            case "likes" -> {
+            case "likes" : {
                 if (!userStorage.getAll().containsKey(otherId)) {
                     throw new EntityExistException("Ошибка добавления в друзья, пользователя с id = "
                             + otherId + " не существует");
@@ -58,12 +60,14 @@ public class UserService implements ServicePattern<User> {
                     throw new EntityExistException("Ошибка добавления в друзья, пользователя с id = "
                             + userId + " не существует");
                 }
+                break;
             }
 
-            case "isUserExist" -> {
+            case "isUserExist" : {
                 if (!userStorage.getAll().containsKey(userId)) {
                     throw new EntityExistException("Ошибка получения данных пользователя, запись с id = " + userId + " не найдена");
                 }
+                break;
             }
         }
     }

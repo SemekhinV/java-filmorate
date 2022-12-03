@@ -32,17 +32,19 @@ public class FilmService implements ServicePattern<Film> {
 
         switch (flag) {
 
-            case "add" -> {
+            case "add" : {
                 if (storage.getAll().containsValue(film)) {
 
                     throw new EntityExistException("Post error, film " + film.getName() + " already exist.");
                 }
+                break;
             }
-            case "with ID" -> {
+            case "with ID" : {
                 if (storage.getAll().isEmpty() || !storage.getAll().containsKey(film.getId())) {
                     throw new EntityExistException("Ошибка обработки фильма фильма, запись с id = "
                             + film.getId() + " не существует.");
                 }
+                break;
             }
         }
     }
@@ -58,16 +60,18 @@ public class FilmService implements ServicePattern<Film> {
         }
 
         switch (flag) {
-            case "remove" -> {
+            case "remove" : {
                 if (!storage.getEntity(filmId).getLikes().contains(userId)) {
                     throw new EntityExistException("Ошибка уделания лайка," +
                             " пользователь с id = " + userId + " не оценивал фильм.");
                 }
+                break;
             }
-            case "add" -> {
+            case "add" : {
                 if (storage.getEntity(filmId).getLikes().contains(userId)) {
                     throw new EntityExistException("Ошибка добавления лайка, пользователь может оценить фильм только один раз");
                 }
+                break;
             }
         }
     }
