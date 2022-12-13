@@ -46,4 +46,8 @@ public class Film implements Comparable<Film> {                             //Д
     public int compareTo(Film film) {               //Вызов метода пропускался и сортировка не выполнялась
         return film.getLikes().size() - this.getLikes().size();
     }
+
+    String genre;
+
+    String MPA;
 }
