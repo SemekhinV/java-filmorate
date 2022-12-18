@@ -1,30 +1,42 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.films;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import ru.yandex.practicum.filmorate.dao.users.UserDao;
 import ru.yandex.practicum.filmorate.entity.Film;
+import ru.yandex.practicum.filmorate.entity.Mpa;
 import ru.yandex.practicum.filmorate.exception.EntityExistException;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.dao.films.FilmDao;
+import ru.yandex.practicum.filmorate.dao.mpa.MpaDao;
 
 import javax.validation.Valid;
+
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Validated
-public class FilmService implements ServicePattern<Film> {
+public class FilmServiceImpl implements FilmService {
 
     private static final LocalDate DATE_BOUNDARY_VALUE = LocalDate.of(1895, 12, 28);
 
-    private final InMemoryFilmStorage storage;
+    private final FilmDao filmDao;
+    private final MpaDao mpaDao;
+    private final UserDao userDao;
+
+    private int id;
 
     private void isValid(Film film, String flag) {
+
+        if (film == null) {
+            throw new InvalidValueException("Ошибка обработки фильма, передано пустое значение.");
+        }
 
         if (film.getReleaseDate().isBefore(DATE_BOUNDARY_VALUE)) {
             throw new InvalidValueException("Invalid release date");
@@ -33,14 +45,14 @@ public class FilmService implements ServicePattern<Film> {
         switch (flag) {
 
             case "add" : {
-                if (storage.getAll().containsValue(film)) {
+                if (filmDao.getAll().contains(film)) {
 
                     throw new EntityExistException("Post error, film " + film.getName() + " already exist.");
                 }
                 break;
             }
             case "with ID" : {
-                if (storage.getAll().isEmpty() || !storage.getAll().containsKey(film.getId())) {
+                if (filmDao.getEntity(film.getId()).isEmpty()) {
                     throw new EntityExistException("Ошибка обработки фильма фильма, запись с id = "
                             + film.getId() + " не существует.");
                 }
@@ -55,20 +67,24 @@ public class FilmService implements ServicePattern<Film> {
             throw new InvalidValueException("Ошибка добавление лайка, некорректный ID.");
         }
 
-        if (!storage.getAll().containsKey(filmId)) {
+        if (filmDao.getEntity(filmId).isEmpty()) {
             throw new EntityExistException("Ошибка добавления лайка фильму, фильм с id = " + filmId + " не найден.");
+        }
+
+        if (userDao.getEntity(userId).isEmpty()) {
+            throw new EntityExistException("Ошибка добавления лайка, пользователь с id = " + userId + " не найден.");
         }
 
         switch (flag) {
             case "remove" : {
-                if (!storage.getEntity(filmId).getLikes().contains(userId)) {
+                if (!filmDao.getEntity(filmId).get().getLikes().contains(userId)) {
                     throw new EntityExistException("Ошибка уделания лайка," +
                             " пользователь с id = " + userId + " не оценивал фильм.");
                 }
                 break;
             }
             case "add" : {
-                if (storage.getEntity(filmId).getLikes().contains(userId)) {
+                if (filmDao.getEntity(filmId).get().getLikes().contains(userId)) {
                     throw new EntityExistException("Ошибка добавления лайка, пользователь может оценить фильм только один раз");
                 }
                 break;
@@ -81,17 +97,25 @@ public class FilmService implements ServicePattern<Film> {
 
         isValid(film, "add");
 
-        return storage.addEntity(film);
+        Mpa mpa = mpaDao
+                .getById(film.getMpa().getId())
+                .orElseThrow(() -> {
+                    throw new EntityExistException("Ошибка добавления фильма, значение МРА не найдено.");
+                });
+
+        film.setMpa(mpa);
+
+        film.setId(++id);
+
+        return filmDao.addEntity(film);
     }
 
     @Override
     public Film getData(int id) {
 
-        if (storage.getAll().isEmpty() || !storage.getAll().containsKey(id)) {
-            throw new EntityExistException("Ошибка поиска фильма, запись с id = " + id + " не надена.");
-        }
-
-        return storage.getEntity(id);
+        return filmDao.getEntity(id).orElseThrow(
+                () -> {throw new EntityExistException("Ошибка поиска фильма, запись с id =" + id + " не найдена.");}
+        );
     }
 
     @Override
@@ -99,42 +123,45 @@ public class FilmService implements ServicePattern<Film> {
 
         isValid(film, "with ID");
 
-        return storage.updateEntity(film);
+        Mpa mpa = mpaDao.getById(
+                film.getMpa().getId()
+                ).orElseThrow(() -> {
+                    throw new EntityExistException("Ошибка поиска MPA при обновлении фильма" +
+                            ", запись с id =" + film.getMpa().getId() + " не найдена.");
+                });
+
+        film.setMpa(mpa);
+
+        return filmDao.updateEntity(film);
     }
 
     @Override
-    public Film removeData(@Valid Film film) {
+    public List<Film> getAll() {
 
-        isValid(film, "with ID");
-
-        return storage.removeEntity(film);
+        return filmDao.getAll();
     }
 
     @Override
-    public Map<Integer, Film> getAll() {
-
-        return storage.getAll();
-    }
-
     public void addLike(int filmId, int userId) {
 
         isLikeOpValid(userId, filmId, "add");
 
-        storage.getEntity(filmId).getLikes().add(userId);
+        filmDao.addLike(filmId, userId);
     }
 
+    @Override
     public void removeLike(int filmId, int userId) {
 
         isLikeOpValid(userId, filmId, "remove");
 
-        storage.getEntity(filmId).getLikes().remove(userId);
+        filmDao.deleteLike(filmId, userId);
     }
 
+    @Override
     public List<Film> getPopularFilms(int count) {
 
-        return storage
+        return filmDao
                 .getAll()
-                .values()
                 .stream()
                 .sorted(Film::compareTo)
                 .limit(count)

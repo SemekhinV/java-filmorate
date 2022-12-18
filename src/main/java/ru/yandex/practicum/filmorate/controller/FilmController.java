@@ -2,18 +2,17 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.entity.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
 
-import java.util.Collection;
+import org.springframework.web.bind.annotation.*;
+
+import ru.yandex.practicum.filmorate.entity.Film;
+import ru.yandex.practicum.filmorate.service.films.FilmService;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class FilmController {
 
@@ -34,14 +33,6 @@ public class FilmController {
         return service.getData(filmId);
     }
 
-    @DeleteMapping
-    public Film deleteFilmById(@RequestBody Film film) {
-
-        log.info("Удаление фильма filmId = {}, filmData = {}", film.getId(), film);
-
-        return service.removeData(film);
-    }
-
     @PutMapping()
     public Film putFilm(@RequestBody Film film) {
 
@@ -51,8 +42,8 @@ public class FilmController {
     }
 
     @GetMapping
-    public Collection<Film> getFilms() {
-        return service.getAll().values();
+    public List<Film> getFilms() {
+        return service.getAll();
     }
 
     @PutMapping("{id}/like/{userId}")

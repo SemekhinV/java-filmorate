@@ -1,14 +1,16 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.dao.films;
 
-import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.entity.Film;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-@Component
-public class InMemoryFilmStorage implements Storage<Film> {
+
+
+public class InMemoryFilmStorage{
 
     @NotNull
     private final Map<Integer, Film> filmStorage;
@@ -21,7 +23,7 @@ public class InMemoryFilmStorage implements Storage<Film> {
         this.id = 0;
     }
 
-    @Override
+
     public Film addEntity(Film film) {
 
         film = film.toBuilder().id(++id).build();
@@ -30,25 +32,38 @@ public class InMemoryFilmStorage implements Storage<Film> {
         return film;
     }
 
-    @Override
-    public Film getEntity(int id) {
-        return filmStorage.get(id);
+
+    public Optional<Film> getEntity(int id) {
+        return Optional.ofNullable(filmStorage.get(id));
     }
 
-    @Override
-    public Film removeEntity(Film film) {
-        return filmStorage.remove(film.getId());
+
+    public void addLike(int film, int userId) {
+
     }
 
-    @Override
+
+    public void deleteLike(int film, int userId) {
+
+    }
+
+
+    public List<Film> getPopularFilms(int count) {
+        return null;
+    }
+
+
+
+
     public Film updateEntity(Film film) {
         filmStorage.put(film.getId(), film);
         return film;
     }
 
-    @Override
-    public Map<Integer, Film> getAll() {
-        return filmStorage;
+
+    public List<Film> getAll() {
+        //return filmStorage;
+        return List.of();
     }
 
 }

@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.exception.EntityExistException;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.service.users.UserServiceImpl;
+import ru.yandex.practicum.filmorate.dao.users.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,23 +16,23 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class UserServiceValidationTests {
+public class UserServiceImplValidationTests {
 
-    private UserService service;
+    private UserServiceImpl service;
     private User user;
 
-    @BeforeEach
-    void beforeEach() {
-        service = new UserService(new InMemoryUserStorage());
-        user = User
-                .builder()
-                .id(0)
-                .login("dolore")
-                .name("Nick Name")
-                .email("mail@mail.ru")
-                .birthday(LocalDate.parse("1946-08-20"))
-                .build();
-    }
+//    @BeforeEach
+//    void beforeEach() {
+//        service = new UserServiceImpl(new InMemoryUserStorage());
+//        user = User
+//                .builder()
+//                .id(0)
+//                .login("dolore")
+//                .name("Nick Name")
+//                .email("mail@mail.ru")
+//                .birthday(LocalDate.parse("1946-08-20"))
+//                .build();
+//    }
 
     @Test
     void userAlreadyExistTest() {
@@ -102,17 +102,6 @@ public class UserServiceValidationTests {
         assertEquals(user2, service.getData(user2.getId()));
     }
 
-    @Test
-    void removeEntityTest() {
-
-        service.addData(user);
-
-        user.setId(1);
-
-        service.removeData(user);
-
-        assertEquals(0, service.getAll().values().size());
-    }
 
     @Test
     void getAllTest() {

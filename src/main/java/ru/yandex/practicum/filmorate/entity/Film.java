@@ -1,20 +1,28 @@
 package ru.yandex.practicum.filmorate.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
+
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+
 import java.time.LocalDate;
+
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
-@Value                                          //Выбрана аннотация @Value, исходя из логики, что фильм - объект
-@Builder(toBuilder = true)                      //Неизменяемый, у него не может поменяться продолжительность или
+@Data
+@Builder(toBuilder = true)
+@AllArgsConstructor
 public class Film implements Comparable<Film> {                             //Дата выхода
 
     @Min(
@@ -39,7 +47,7 @@ public class Film implements Comparable<Film> {                             //Д
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate releaseDate;
 
-    Set<Integer> likes = new HashSet<>();
+    final Set<Integer> likes = new HashSet<>();
 
     @Override                                       //Была добавлена реализация интерфейса Comparable, т.к.
     //При использовании метода Comparable.compareInt()
@@ -47,7 +55,8 @@ public class Film implements Comparable<Film> {                             //Д
         return film.getLikes().size() - this.getLikes().size();
     }
 
-    String genre;
+    final List<Genre> genres = new ArrayList<>();
 
-    String MPA;
+    @NotNull(message = "Ошибка создания сущности, список категорий МРА-рейтинга пуст")
+    Mpa mpa;
 }
