@@ -2,10 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.EntityExistException;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
 import ru.yandex.practicum.filmorate.exception.validation.ErrorResponse;
@@ -16,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@ControllerAdvice
+@RestControllerAdvice
 @Slf4j
 public class ValidationErrorController {
 
@@ -50,7 +47,7 @@ public class ValidationErrorController {
 
     //Обработка исключения
     @ExceptionHandler()
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse invalidValueExceptionHandle(final InvalidValueException e) {
         log.error("Ошибка обработки, вызванная некоректными данными: " + e.getMessage());
         return new ErrorResponse("Ошибка при обработке некорректных данных: ".concat(e.getMessage()));

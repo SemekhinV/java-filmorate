@@ -47,6 +47,7 @@ public class FilmDaoImpl implements FilmDao{
 
     @Override
     public Film updateEntity(Film entity) {
+
         jdbcTemplate.update(
                 "UPDATE film " +
                         "SET name = ?, " +
@@ -62,19 +63,38 @@ public class FilmDaoImpl implements FilmDao{
                 entity.getMpa().getId(),
                 entity.getId());
 
-        List<Genre> filmGenres = getFilmGenres(entity.getId());
-
-        List<Integer> filmsAdded = entity.getGenres().stream()
-                .filter(genre -> !filmGenres.contains(genre))
+        List<Integer> filmGenres = getFilmGenres(entity.getId())
+                .stream()
                 .map(Genre::getId)
                 .collect(Collectors.toList());
+
+        List<Integer> filmsAdded = entity.getGenres()
+                .stream()
+                .map(Genre::getId)
+                .filter(genre -> !filmGenres.contains(genre))
+                .distinct()
+                .collect(Collectors.toList());
+
         addGenres(entity.getId(), filmsAdded);
 
-        List<Integer> filmsRemoved = filmGenres.stream()
-                .filter(genre -> !entity.getGenres().contains(genre))
+        List<Integer> newGenreList = entity
+                .getGenres()
+                .stream()
+                .distinct()
                 .map(Genre::getId)
                 .collect(Collectors.toList());
+
+        List<Integer> filmsRemoved = filmGenres
+                .stream()
+                .filter(genre -> !newGenreList.contains(genre))
+                .collect(Collectors.toList());
         removeGenres(entity.getId(), filmsRemoved);
+
+        entity.getGenres().clear();
+
+        for (Genre g : getFilmGenres(entity.getId())) {
+            entity.getGenres().add(g);
+        }
 
         return entity;
     }
@@ -151,6 +171,7 @@ public class FilmDaoImpl implements FilmDao{
     }
 
     public void addGenres(int filmId, List<Integer> genres) {
+
         jdbcTemplate.batchUpdate(
 
                 "INSERT INTO film_genre (film_id, genre_id) VALUES (?,?)",
@@ -203,7 +224,7 @@ public class FilmDaoImpl implements FilmDao{
         return film;
     }
 
-    private List<Genre> getFilmGenres(int filmId) {
+    public List<Genre> getFilmGenres(int filmId) {
 
         return jdbcTemplate.query(
                 "SELECT * " +

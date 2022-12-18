@@ -76,7 +76,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    private List<User> getMutualFriends(@PathVariable("id") int userId, @PathVariable int otherId) {
+    public List<User> getMutualFriends(@PathVariable("id") int userId, @PathVariable int otherId) {
 
         log.info("Пользователь userId = {} отправил запрос на отображение списка общих друзей с otherId = {}",
                 userId, otherId);

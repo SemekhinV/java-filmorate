@@ -52,16 +52,24 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void isIdValid(int userId, int otherId) {
+    private void isIdValid(int userId, int friendId) {
+
+        if (userId < 1) {
+            throw new EntityExistException("Ошибка при обработке друзей, некорректное значение id.");
+        }
+
+        if (friendId != -101 && (userId + friendId) <=2) {
+            throw new EntityExistException("Ошибка при обработке друзей, некорректное значение id.");
+        }
 
         if (userDao.getEntity(userId).isEmpty()) {
             throw new EntityExistException("Ошибка добавления в друзья, пользователя с id = "
-                    + otherId + " не существует");
+                    + friendId + " не существует");
         }
 
-        if (otherId != -1 && userDao.getEntity(otherId).isEmpty()) {
+        if (friendId != -101 && userDao.getEntity(friendId).isEmpty()) {
             throw new EntityExistException("Ошибка добавления в друзья, пользователя с id = "
-                    + otherId + " не существует");
+                    + friendId + " не существует");
         }
     }
 
@@ -87,7 +95,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getData(int id) {
 
-        isIdValid(id, -1);
+        isIdValid(id, -101);
 
         return userDao.getEntity(id).get();
     }
@@ -117,7 +125,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getFriends(int userId) {
 
-        isIdValid(userId, -1);
+        isIdValid(userId, -101);
 
         return userDao
                 .getFriends(userId)

@@ -35,7 +35,7 @@ public class FilmServiceImpl implements FilmService {
     private void isValid(Film film, String flag) {
 
         if (film == null) {
-            throw new InvalidValueException("Ошибка обработки фильма, передано пустое значение.");
+            throw new EntityExistException("Ошибка обработки фильма, передано пустое значение.");
         }
 
         if (film.getReleaseDate().isBefore(DATE_BOUNDARY_VALUE)) {
@@ -64,7 +64,7 @@ public class FilmServiceImpl implements FilmService {
     private void isLikeOpValid(int userId, int filmId, String flag) {
 
         if (userId < 0 ) {
-            throw new InvalidValueException("Ошибка добавление лайка, некорректный ID.");
+            throw new EntityExistException("Ошибка добавление лайка, некорректный ID.");
         }
 
         if (filmDao.getEntity(filmId).isEmpty()) {
@@ -93,7 +93,7 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public Film addData(@Valid Film film) {
+    public Film addData(Film film) {
 
         isValid(film, "add");
 
@@ -119,7 +119,7 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public Film updateData(@Valid Film film) {
+    public Film updateData(Film film) {
 
         isValid(film, "with ID");
 
