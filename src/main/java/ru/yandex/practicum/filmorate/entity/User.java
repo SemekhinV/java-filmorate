@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.entity;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.*;
@@ -12,6 +14,7 @@ import java.util.Set;
 
 @Data
 @Builder(toBuilder = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class User {
 
@@ -19,23 +22,23 @@ public class User {
             value = 0,
             message = "Значение поля id должно быть больше нуля"
     )
-    private int id;
+    int id;
 
     @Email(message = "Некорректный вид email-адреса.")
-    private String email;
+    String email;
 
     @NotBlank
     @Pattern(
             regexp = "^\\S*$",
             message = "Поле login не долно содержать пробелов."
     )                           //Регулярное выражение для проверки отсутсвия пробелов
-    private String login;
+    String login;
 
-    private String name;
+    String name;
 
     @PastOrPresent              //Аннотация указывает на прошлое, включая настоящее
     @DateTimeFormat(pattern = "dd.MM.yyyy")
-    private LocalDate birthday;
+    LocalDate birthday;
 
-    private final Set<Integer> friends = new HashSet<>();
+    final Set<Integer> friends = new HashSet<>();
 }

@@ -10,11 +10,11 @@ public interface UserDao {
 
     Optional<User> addEntity(@Valid User entity);
 
-    Optional<User> getEntity(int id);
+    Optional<User> getUser(int id);
 
     List<User> getAll();
 
-    Optional<User> updateEntity(@Valid User entity);
+    Optional<User> updateUser(@Valid User entity);
 
     void addFriend(int userId, int friendId);
 

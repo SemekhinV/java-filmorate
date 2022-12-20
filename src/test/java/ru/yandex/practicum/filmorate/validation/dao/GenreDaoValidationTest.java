@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.yandex.practicum.filmorate.dao.filmgenre.FilmGenreDao;
 import ru.yandex.practicum.filmorate.dao.films.FilmDaoImpl;
 import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.entity.Genre;
@@ -27,11 +28,14 @@ public class GenreDaoValidationTest {
     @Autowired
     private final FilmDaoImpl filmDao;
 
+    @Autowired
+    private final FilmGenreDao filmGenreDao;
+
     private Film film;
 
     @BeforeEach
     public void initialize() {
-        film = filmDao.addEntity(
+        film = filmDao.addFilm(
                 new Film(
                         1,
                         100,
@@ -44,11 +48,11 @@ public class GenreDaoValidationTest {
     @Test
     void addGenreTest() {
 
-        filmDao.addGenres(film.getId(), List.of(1,2));
+        filmGenreDao.addGenres(film.getId(), List.of(1,2));
 
         assertEquals(
                 List.of(1,2) ,
-                filmDao.getFilmGenres(film.getId())
+                filmGenreDao.getById(film.getId())
                         .stream()
                         .map(Genre::getId)
                         .collect(Collectors.toList())
@@ -58,17 +62,18 @@ public class GenreDaoValidationTest {
     @Test
     void removeGenreTest() {
 
-        filmDao.addGenres(film.getId(), List.of(1,2));
+        filmGenreDao.addGenres(film.getId(), List.of(1,2));
 
-        filmDao.removeGenres(film.getId(), List.of(1,2));
+        filmGenreDao.removeGenres(film.getId(), List.of(1,2));
 
-        assertEquals(0, filmDao.getFilmGenres(film.getId()).size());
+        assertEquals(0, filmGenreDao.getById(film.getId()).size());
     }
 
     @Test
     void getGenreTest() {
-        filmDao.addGenres(film.getId(), List.of(1));
 
-        assertEquals(new Genre(1, "Комедия"), filmDao.getFilmGenres(film.getId()).get(0));
+        filmGenreDao.addGenres(film.getId(), List.of(1));
+
+        assertEquals(new Genre(1, "Комедия"), filmGenreDao.getById(film.getId()).get(0));
     }
 }

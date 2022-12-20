@@ -13,8 +13,6 @@ import ru.yandex.practicum.filmorate.exception.InvalidValueException;
 import ru.yandex.practicum.filmorate.dao.films.FilmDao;
 import ru.yandex.practicum.filmorate.dao.mpa.MpaDao;
 
-import javax.validation.Valid;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,7 +50,7 @@ public class FilmServiceImpl implements FilmService {
                 break;
             }
             case "with ID" : {
-                if (filmDao.getEntity(film.getId()).isEmpty()) {
+                if (filmDao.getFilm(film.getId()).isEmpty()) {
                     throw new EntityExistException("Ошибка обработки фильма фильма, запись с id = "
                             + film.getId() + " не существует.");
                 }
@@ -67,24 +65,24 @@ public class FilmServiceImpl implements FilmService {
             throw new EntityExistException("Ошибка добавление лайка, некорректный ID.");
         }
 
-        if (filmDao.getEntity(filmId).isEmpty()) {
+        if (filmDao.getFilm(filmId).isEmpty()) {
             throw new EntityExistException("Ошибка добавления лайка фильму, фильм с id = " + filmId + " не найден.");
         }
 
-        if (userDao.getEntity(userId).isEmpty()) {
+        if (userDao.getUser(userId).isEmpty()) {
             throw new EntityExistException("Ошибка добавления лайка, пользователь с id = " + userId + " не найден.");
         }
 
         switch (flag) {
             case "remove" : {
-                if (!filmDao.getEntity(filmId).get().getLikes().contains(userId)) {
+                if (!filmDao.getFilm(filmId).get().getLikes().contains(userId)) {
                     throw new EntityExistException("Ошибка уделания лайка," +
                             " пользователь с id = " + userId + " не оценивал фильм.");
                 }
                 break;
             }
             case "add" : {
-                if (filmDao.getEntity(filmId).get().getLikes().contains(userId)) {
+                if (filmDao.getFilm(filmId).get().getLikes().contains(userId)) {
                     throw new EntityExistException("Ошибка добавления лайка, пользователь может оценить фильм только один раз");
                 }
                 break;
@@ -107,13 +105,13 @@ public class FilmServiceImpl implements FilmService {
 
         film.setId(++id);
 
-        return filmDao.addEntity(film);
+        return filmDao.addFilm(film);
     }
 
     @Override
     public Film getData(int id) {
 
-        return filmDao.getEntity(id).orElseThrow(
+        return filmDao.getFilm(id).orElseThrow(
                 () -> {throw new EntityExistException("Ошибка поиска фильма, запись с id =" + id + " не найдена.");}
         );
     }
@@ -132,7 +130,7 @@ public class FilmServiceImpl implements FilmService {
 
         film.setMpa(mpa);
 
-        return filmDao.updateEntity(film);
+        return filmDao.updateFilm(film);
     }
 
     @Override

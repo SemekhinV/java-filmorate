@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.entity;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import lombok.experimental.FieldDefaults;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -22,6 +24,7 @@ import java.util.Set;
 
 @Data
 @Builder(toBuilder = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class Film implements Comparable<Film> {                             //Дата выхода
 
@@ -49,8 +52,7 @@ public class Film implements Comparable<Film> {                             //Д
 
     final Set<Integer> likes = new HashSet<>();
 
-    @Override                                       //Была добавлена реализация интерфейса Comparable, т.к.
-    //При использовании метода Comparable.compareInt()
+    @Override
     public int compareTo(Film film) {               //Вызов метода пропускался и сортировка не выполнялась
         return film.getLikes().size() - this.getLikes().size();
     }

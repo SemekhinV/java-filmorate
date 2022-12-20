@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.dao.genre;
 
-import ru.yandex.practicum.filmorate.entity.Genre;
-
 import java.util.List;
 import java.util.Optional;
+
+import ru.yandex.practicum.filmorate.entity.Genre;
 
 public interface GenreDao {
 

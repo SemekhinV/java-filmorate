@@ -36,14 +36,14 @@ public class UserServiceImpl implements UserService {
 
         switch (flag) {
             case "add" : {
-                if (userDao.getEntity(user.getId()).isPresent()) {
+                if (userDao.getUser(user.getId()).isPresent()) {
                     throw new EntityExistException("Ошибка получения данных пользователя, запись с id = "
                             + user.getId() + " уже существует");
                 }
                 break;
             }
             case "update" : {
-                if (userDao.getEntity(user.getId()).isEmpty()) {
+                if (userDao.getUser(user.getId()).isEmpty()) {
                     throw new EntityExistException("Ошибка получения данных пользователя, запись с id = " + user.getId()
                             + " не найдена");
                 }
@@ -62,12 +62,12 @@ public class UserServiceImpl implements UserService {
             throw new EntityExistException("Ошибка при обработке друзей, некорректное значение id.");
         }
 
-        if (userDao.getEntity(userId).isEmpty()) {
+        if (userDao.getUser(userId).isEmpty()) {
             throw new EntityExistException("Ошибка добавления в друзья, пользователя с id = "
                     + friendId + " не существует");
         }
 
-        if (friendId != -101 && userDao.getEntity(friendId).isEmpty()) {
+        if (friendId != -101 && userDao.getUser(friendId).isEmpty()) {
             throw new EntityExistException("Ошибка добавления в друзья, пользователя с id = "
                     + friendId + " не существует");
         }
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
 
         isUserValid(user, "update");
 
-        return userDao.updateEntity(user).get();
+        return userDao.updateUser(user).get();
     }
 
 
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
 
         isIdValid(id, -101);
 
-        return userDao.getEntity(id).get();
+        return userDao.getUser(id).get();
     }
 
     @Override
@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
         return userDao
                 .getFriends(userId)
                 .stream()
-                .map(userDao::getEntity)
+                .map(userDao::getUser)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
@@ -147,7 +147,7 @@ public class UserServiceImpl implements UserService {
         return user.getFriends()
                 .stream()
                 .filter(id -> friend.getFriends().contains(id))
-                .map(userDao::getEntity)
+                .map(userDao::getUser)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());

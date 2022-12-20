@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dao.userfriends.UserLikesDao;
 import ru.yandex.practicum.filmorate.entity.User;
 
 import java.sql.Date;
@@ -18,6 +19,8 @@ import java.util.Optional;
 public class UserDaoImpl implements UserDao{
 
     private final JdbcTemplate jdbcTemplate;
+
+    private final UserLikesDao userLikesDao;
 
     @Override
     public Optional<User> addEntity(User entity) {
@@ -34,7 +37,7 @@ public class UserDaoImpl implements UserDao{
     }
 
     @Override
-    public Optional<User> updateEntity(User entity) {
+    public Optional<User> updateUser(User entity) {
 
         jdbcTemplate.update(
                 "UPDATE users " +
@@ -49,11 +52,11 @@ public class UserDaoImpl implements UserDao{
                 Date.valueOf(entity.getBirthday()),
                 entity.getId());
 
-        return getEntity(entity.getId());
+        return getUser(entity.getId());
     }
 
     @Override
-    public Optional<User> getEntity(int id) {
+    public Optional<User> getUser(int id) {
 
         SqlRowSet userRow = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM users WHERE id = ?", id);
@@ -84,33 +87,17 @@ public class UserDaoImpl implements UserDao{
 
     @Override
     public void addFriend(int userId, int friendId) {
-
-        jdbcTemplate.update(
-                "INSERT INTO user_friends (user_id, friends_id) " +
-                        "VALUES (?,?)",
-                userId, friendId
-        );
+        userLikesDao.addFriend(userId, friendId);
     }
 
     @Override
     public List<Integer> getFriends(int userId) {
-
-        return jdbcTemplate.query(
-                "SELECT friends_id " +
-                        "FROM user_friends " +
-                        "WHERE user_id = ?",
-                (resultSet, rowNum) -> resultSet.getInt("friends_id"), userId);
+        return userLikesDao.getFriends(userId);
     }
 
     @Override
     public void removeFriend(int userId, int friendId) {
-
-        jdbcTemplate.update(
-                "DELETE FROM user_friends " +
-                        "WHERE user_id = ? AND friends_id = ?",
-                userId,
-                friendId
-        );
+        userLikesDao.removeFriend(userId, friendId);
     }
 
     private User mappingUser(ResultSet resultSet) throws SQLException {
