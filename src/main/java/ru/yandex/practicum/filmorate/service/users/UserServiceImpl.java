@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service.users;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.userfriends.UserFriendsDao;
 import ru.yandex.practicum.filmorate.dao.users.UserDao;
 import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.exception.EntityExistException;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
+
+    private final UserFriendsDao userFriendsDao;
 
     private int id;
 
@@ -74,36 +77,54 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User addData(User user) {
+    public User addUser(User user) {
 
         isUserValid(user, "add");
 
         user.setId(++id);
 
-        return userDao.addEntity(user).get();       //Можем использовать get() без isPresent т.к. проверки уже пройдены
+        if (user.getFriends() != null && !user.getFriends().isEmpty()) {
+            user.getFriends().forEach(friendId -> userFriendsDao.addFriend(user.getId(), friendId));
+        }
+
+        return userDao.addUser(user).get();       //Можем использовать get() без isPresent т.к. проверки уже пройдены
     }
 
     @Override
-    public User updateData(User user) {
+    public User updateUser(User user) {
 
         isUserValid(user, "update");
+
+        if (user.getFriends() != null) {
+            user = userFriendsDao.updateUserFriends(user);
+        }
 
         return userDao.updateUser(user).get();
     }
 
 
     @Override
-    public User getData(int id) {
+    public User getUser(int id) {
 
         isIdValid(id, -101);
 
-        return userDao.getUser(id).get();
+        User searchableUser = userDao.getUser(id).orElseThrow(
+                () -> {throw new EntityExistException("Ошибка поиска юзера, запись с id = " + id + " не найдена.");}
+        );
+
+        searchableUser.getFriends().addAll(userFriendsDao.getFriends(id));
+
+        return searchableUser;
     }
 
     @Override
     public List<User> getAll() {
 
-        return userDao.getAll();
+        List<User> allUser = userDao.getAll();
+
+        allUser.forEach(user -> user.getFriends().addAll(userFriendsDao.getFriends(user.getId())));
+
+        return allUser;
     }
 
     @Override
@@ -111,7 +132,7 @@ public class UserServiceImpl implements UserService {
 
         isIdValid(userId, friendId);
 
-        userDao.addFriend(userId, friendId);
+        userFriendsDao.addFriend(userId, friendId);
     }
 
     @Override
@@ -119,15 +140,15 @@ public class UserServiceImpl implements UserService {
 
         isIdValid(userId, friendId);
 
-        userDao.removeFriend(userId, friendId);
+        userFriendsDao.removeFriend(userId, friendId);
     }
 
     @Override
-    public List<User> getFriends(int userId) {
+    public List<User> getUserFriends(int userId) {
 
         isIdValid(userId, -101);
 
-        return userDao
+        return userFriendsDao
                 .getFriends(userId)
                 .stream()
                 .map(userDao::getUser)
@@ -141,15 +162,13 @@ public class UserServiceImpl implements UserService {
 
         isIdValid(userId, friendId);
 
-        User user = getData(userId);
-        User friend = getData(friendId);
+        User user = getUser(userId);
+        User friend = getUser(friendId);
 
         return user.getFriends()
                 .stream()
                 .filter(id -> friend.getFriends().contains(id))
-                .map(userDao::getUser)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .map(this::getUser)
                 .collect(Collectors.toList());
     }
 

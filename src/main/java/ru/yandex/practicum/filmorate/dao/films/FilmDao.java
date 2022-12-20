@@ -8,18 +8,14 @@ import java.util.Optional;
 
 public interface FilmDao {
                                             //Удобнее иметь один интерфейс под хранилище, чтобы не
-    Film addFilm(@Valid Film entity);       //Захламлять код лишними классами, т.к.
+    Film addFilm(@Valid Film film);       //Захламлять код лишними классами, т.к.
 
                                             //При обе реализации имеют одинаковые методы
     Optional<Film> getFilm(int id);
-
-    void addLike(int filmId, int userId);
-
-    void deleteLike(int filmId, int userId);
 
     List<Film> getPopularFilms(int count);
 
     List<Film> getAll();
 
-    Film updateFilm(@Valid Film entity);
+    Film updateFilm(@Valid Film film);
 }

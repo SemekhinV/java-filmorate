@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.entity.Genre;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -35,6 +37,47 @@ public class FilmGenreDaoImpl implements FilmGenreDao {
                         return genres.size();
                     }
                 });
+    }
+
+    /**
+     * @param film в результате работы метода будут получены текущие жанры, присущие данному объекту, после чего
+     *             произойдет обработка и замена, в случае необходимости, текущих жанров на новые.
+     */
+    @Override
+    public Film updateFilmGenres(Film film) {
+
+        List<Integer> filmGenres = getById(film.getId())
+                .stream()
+                .map(Genre::getId)
+                .collect(Collectors.toList());
+
+        List<Integer> filmsAdded = film.getGenres()
+                .stream()
+                .map(Genre::getId)
+                .filter(genre -> !filmGenres.contains(genre))
+                .distinct()
+                .collect(Collectors.toList());
+
+        addGenres(film.getId(), filmsAdded);
+
+        List<Integer> newGenreList = film
+                .getGenres()
+                .stream()
+                .distinct()
+                .map(Genre::getId)
+                .collect(Collectors.toList());
+
+        List<Integer> filmsRemoved = filmGenres
+                .stream()
+                .filter(genre -> !newGenreList.contains(genre))
+                .collect(Collectors.toList());
+        removeGenres(film.getId(), filmsRemoved);
+
+        film.getGenres().clear();
+
+        film.getGenres().addAll(getById(film.getId()));
+
+        return film;
     }
 
     @Override

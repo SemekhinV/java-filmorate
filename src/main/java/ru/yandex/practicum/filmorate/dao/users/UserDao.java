@@ -8,17 +8,12 @@ import java.util.Optional;
 
 public interface UserDao {
 
-    Optional<User> addEntity(@Valid User entity);
+    Optional<User> addUser(@Valid User user);
 
     Optional<User> getUser(int id);
 
     List<User> getAll();
 
-    Optional<User> updateUser(@Valid User entity);
+    Optional<User> updateUser(@Valid User user);
 
-    void addFriend(int userId, int friendId);
-
-    List<Integer> getFriends(int userId);
-
-    void removeFriend(int userId, int friendId);
 }

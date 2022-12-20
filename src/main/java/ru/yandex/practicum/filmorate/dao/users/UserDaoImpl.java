@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dao.userfriends.UserLikesDao;
 import ru.yandex.practicum.filmorate.entity.User;
 
 import java.sql.Date;
@@ -20,24 +19,22 @@ public class UserDaoImpl implements UserDao{
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final UserLikesDao userLikesDao;
-
     @Override
-    public Optional<User> addEntity(User entity) {
+    public Optional<User> addUser(User user) {
 
         jdbcTemplate.update(
                 "INSERT INTO users (id, email, login, name, birthday) VALUES (?,?,?,?,?)",
-                entity.getId(),
-                entity.getEmail(),
-                entity.getLogin(),
-                entity.getName(),
-                Date.valueOf(entity.getBirthday()));
+                user.getId(),
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                Date.valueOf(user.getBirthday()));
 
-        return Optional.of(entity);
+        return Optional.of(user);
     }
 
     @Override
-    public Optional<User> updateUser(User entity) {
+    public Optional<User> updateUser(User user) {
 
         jdbcTemplate.update(
                 "UPDATE users " +
@@ -46,13 +43,13 @@ public class UserDaoImpl implements UserDao{
                         "name = ?, " +
                         "birthday = ?" +
                         "WHERE id = ?",
-                entity.getEmail(),
-                entity.getLogin(),
-                entity.getName(),
-                Date.valueOf(entity.getBirthday()),
-                entity.getId());
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                Date.valueOf(user.getBirthday()),
+                user.getId());
 
-        return getUser(entity.getId());
+        return getUser(user.getId());
     }
 
     @Override
@@ -71,7 +68,6 @@ public class UserDaoImpl implements UserDao{
                     .birthday(Objects.requireNonNull(userRow.getDate("birthday")).toLocalDate())
                     .build();
 
-            user.getFriends().addAll(getFriends(id));
             return Optional.of(user);
         } else {
             return Optional.empty();
@@ -85,32 +81,15 @@ public class UserDaoImpl implements UserDao{
                 (rs, rowNum) -> mappingUser(rs));
     }
 
-    @Override
-    public void addFriend(int userId, int friendId) {
-        userLikesDao.addFriend(userId, friendId);
-    }
-
-    @Override
-    public List<Integer> getFriends(int userId) {
-        return userLikesDao.getFriends(userId);
-    }
-
-    @Override
-    public void removeFriend(int userId, int friendId) {
-        userLikesDao.removeFriend(userId, friendId);
-    }
 
     private User mappingUser(ResultSet resultSet) throws SQLException {
 
-        User user = User.builder()
+        return User.builder()
                 .id(resultSet.getInt("id"))
                 .login(resultSet.getString("login"))
                 .name(resultSet.getString("name"))
                 .email(resultSet.getString("email"))
                 .birthday(resultSet.getDate("birthday").toLocalDate())
                 .build();
-
-        user.getFriends().addAll(getFriends(resultSet.getInt("id")));
-        return user;
     }
 }

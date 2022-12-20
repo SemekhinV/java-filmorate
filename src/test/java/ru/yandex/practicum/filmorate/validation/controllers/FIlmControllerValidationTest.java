@@ -8,12 +8,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.entity.Film;
 import ru.yandex.practicum.filmorate.entity.Mpa;
 import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.exception.EntityExistException;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
-import ru.yandex.practicum.filmorate.service.users.UserService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,7 +32,7 @@ public class FIlmControllerValidationTest {
     private FilmController controller;
 
     @Autowired
-    private UserService service;
+    private UserController service;
 
     private Film film;
     private User user;
@@ -41,7 +41,7 @@ public class FIlmControllerValidationTest {
     public void initialize() {
 
         this.film = controller.postFilm(new Film(
-                1,
+                0,
                 100,
                 "Film",
                 "New Film",
@@ -49,13 +49,31 @@ public class FIlmControllerValidationTest {
                 new Mpa(1, "G")
         ));
 
-        this.user = service.addData(new User(
+        this.user = service.postUser(new User(
                 1,
                 "usermail@mail.ru",
                 "admin",
                 "Vasiliy",
                 LocalDate.of(2010, 10, 10)
         ));
+    }
+
+    @Test
+    void addSecondFilm() {
+
+        Film film2 = new Film(
+                0,
+                100,
+                "Film2",
+                "New Film2",
+                LocalDate.now(),
+                new Mpa(1, "G")
+        );
+
+        controller.postFilm(film2);
+
+        assertEquals(film2, controller.getFilmById(2));
+
     }
 
     @Test
@@ -135,7 +153,7 @@ public class FIlmControllerValidationTest {
 
         controller.postFilm(film2);
 
-        service.addData(user2);
+        service.postUser(user2);
 
         controller.addLikeToFilm(film.getId(), user.getId());
 

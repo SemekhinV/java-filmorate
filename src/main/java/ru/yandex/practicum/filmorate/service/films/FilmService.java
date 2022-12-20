@@ -6,11 +6,11 @@ import java.util.List;
 
 public interface FilmService {
 
-    Film addData(Film entity);
+    Film addFilm(Film film);
 
-    Film getData(int id);
+    Film getFilm(int id);
 
-    Film updateData(Film entity);
+    Film updateFilm(Film film);
 
     List<Film> getAll();
 

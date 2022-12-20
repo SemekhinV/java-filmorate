@@ -1,15 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.web.bind.annotation.*;
 
-import ru.yandex.practicum.filmorate.dao.users.UserDao;
 import ru.yandex.practicum.filmorate.entity.User;
 import ru.yandex.practicum.filmorate.service.users.UserService;
-import ru.yandex.practicum.filmorate.service.users.UserServiceImpl;
 
 import javax.validation.Valid;
 
@@ -28,7 +25,7 @@ public class UserController {
 
         log.info("Post new user - {}", user);                //Логирование
 
-        return service.addData(user);
+        return service.addUser(user);
     }
 
     @PutMapping
@@ -36,7 +33,7 @@ public class UserController {
 
         log.info("Put new user - {}", user);                  //Логирование
 
-        return service.updateData(user);
+        return service.updateUser(user);
     }
 
     @GetMapping
@@ -48,7 +45,7 @@ public class UserController {
     public User getUserById(@PathVariable int userId) {
 
         log.info("Запрос на получение данных пользователя с id = {}", userId);
-        return service.getData(userId);
+        return service.getUser(userId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -72,7 +69,7 @@ public class UserController {
 
         log.info("Запрос списка друзей у пользователя userId = {}", userId);
 
-        return service.getFriends(userId);
+        return service.getUserFriends(userId);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")

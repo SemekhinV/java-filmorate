@@ -5,8 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import ru.yandex.practicum.filmorate.dao.filmgenre.FilmGenreDao;
+import ru.yandex.practicum.filmorate.dao.filmlikes.FilmLikesDao;
 import ru.yandex.practicum.filmorate.dao.users.UserDao;
 import ru.yandex.practicum.filmorate.entity.Film;
+import ru.yandex.practicum.filmorate.entity.Genre;
 import ru.yandex.practicum.filmorate.entity.Mpa;
 import ru.yandex.practicum.filmorate.exception.EntityExistException;
 import ru.yandex.practicum.filmorate.exception.InvalidValueException;
@@ -28,6 +31,10 @@ public class FilmServiceImpl implements FilmService {
     private final MpaDao mpaDao;
     private final UserDao userDao;
 
+    private final FilmLikesDao filmLikesDao;
+
+    private final FilmGenreDao filmGenreDao;
+
     private int id;
 
     private void isValid(Film film, String flag) {
@@ -43,7 +50,7 @@ public class FilmServiceImpl implements FilmService {
         switch (flag) {
 
             case "add" : {
-                if (filmDao.getAll().contains(film)) {
+                if (getAll().contains(film)) {
 
                     throw new EntityExistException("Post error, film " + film.getName() + " already exist.");
                 }
@@ -75,14 +82,14 @@ public class FilmServiceImpl implements FilmService {
 
         switch (flag) {
             case "remove" : {
-                if (!filmDao.getFilm(filmId).get().getLikes().contains(userId)) {
+                if (!getFilm(filmId).getLikes().contains(userId)) {
                     throw new EntityExistException("Ошибка уделания лайка," +
                             " пользователь с id = " + userId + " не оценивал фильм.");
                 }
                 break;
             }
             case "add" : {
-                if (filmDao.getFilm(filmId).get().getLikes().contains(userId)) {
+                if (getFilm(filmId).getLikes().contains(userId)) {
                     throw new EntityExistException("Ошибка добавления лайка, пользователь может оценить фильм только один раз");
                 }
                 break;
@@ -91,7 +98,7 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public Film addData(Film film) {
+    public Film addFilm(Film film) {
 
         isValid(film, "add");
 
@@ -105,38 +112,68 @@ public class FilmServiceImpl implements FilmService {
 
         film.setId(++id);
 
-        return filmDao.addFilm(film);
+        filmDao.addFilm(film);
+
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+
+            List<Integer> genreIds = film.getGenres()
+                    .stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toList());
+
+            filmGenreDao.addGenres(film.getId(), genreIds);
+        }
+
+        return film;
     }
 
     @Override
-    public Film getData(int id) {
-
-        return filmDao.getFilm(id).orElseThrow(
-                () -> {throw new EntityExistException("Ошибка поиска фильма, запись с id =" + id + " не найдена.");}
-        );
-    }
-
-    @Override
-    public Film updateData(Film film) {
+    public Film updateFilm(Film film) {
 
         isValid(film, "with ID");
+
 
         Mpa mpa = mpaDao.getById(
                 film.getMpa().getId()
                 ).orElseThrow(() -> {
                     throw new EntityExistException("Ошибка поиска MPA при обновлении фильма" +
-                            ", запись с id =" + film.getMpa().getId() + " не найдена.");
+                            ", запись не найдена.");
                 });
 
         film.setMpa(mpa);
 
-        return filmDao.updateFilm(film);
+        filmDao.updateFilm(film);
+
+        film = filmGenreDao.updateFilmGenres(film);
+
+        return film;
     }
+
+    @Override
+    public Film getFilm(int id) {
+
+        Film searchableFilm = filmDao.getFilm(id).orElseThrow(
+                () -> {throw new EntityExistException("Ошибка поиска фильма, запись с id =" + id + " не найдена.");}
+        );
+
+        searchableFilm.getGenres().addAll(filmGenreDao.getById(id));
+        searchableFilm.getLikes().addAll(filmLikesDao.getUserLikes(id));
+
+        return searchableFilm;
+    }
+
 
     @Override
     public List<Film> getAll() {
 
-        return filmDao.getAll();
+        List<Film> allFilms = filmDao.getAll();
+
+        allFilms.forEach(film -> {
+            film.getGenres().addAll(filmGenreDao.getById(film.getId()));
+            film.getLikes().addAll(filmLikesDao.getUserLikes(film.getId()));
+        });
+
+        return allFilms;
     }
 
     @Override
@@ -144,7 +181,7 @@ public class FilmServiceImpl implements FilmService {
 
         isLikeOpValid(userId, filmId, "add");
 
-        filmDao.addLike(filmId, userId);
+        filmLikesDao.addLike(filmId, userId);
     }
 
     @Override
@@ -152,17 +189,21 @@ public class FilmServiceImpl implements FilmService {
 
         isLikeOpValid(userId, filmId, "remove");
 
-        filmDao.deleteLike(filmId, userId);
+        filmLikesDao.deleteLike(filmId, userId);
     }
 
     @Override
     public List<Film> getPopularFilms(int count) {
 
-        return filmDao
-                .getAll()
-                .stream()
-                .sorted(Film::compareTo)
-                .limit(count)
-                .collect(Collectors.toList());
+        List<Film> popularFilms = filmDao.getPopularFilms(count);
+
+        popularFilms.forEach(
+                film -> {
+                    film.getGenres().addAll(filmGenreDao.getById(film.getId()));
+                    film.getLikes().addAll(filmLikesDao.getUserLikes(film.getId()));
+                }
+        );
+
+        return popularFilms;
     }
 }

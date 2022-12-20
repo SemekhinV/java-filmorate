@@ -26,14 +26,14 @@ public class FilmController {
 
         log.info("Post new film - {}", film);                 //Логирование
 
-        return service.addData(film);
+        return service.addFilm(film);
     }
 
     @GetMapping("/{filmId}")
     public Film getFilmById(@PathVariable int filmId) {
 
         log.info("Запрос на получение данных фильма с id = {}", filmId);
-        return service.getData(filmId);
+        return service.getFilm(filmId);
     }
 
     @PutMapping()
@@ -41,7 +41,7 @@ public class FilmController {
 
         log.info("Put new film - {}", film);                 //Логирование
 
-        return service.updateData(film);
+        return service.updateFilm(film);
     }
 
     @GetMapping

@@ -7,13 +7,13 @@ import java.util.List;
 public interface UserService {
     //В качестве названия методов невозможно использовать просто add, delete
     //И т.д., потому что возникает конфликт с сервисными методами
-    User addData(User entity);             //Аналогично реализации хранилища,
+    User addUser(User entity);             //Аналогично реализации хранилища,
 
     //Используем общий интерфейс для описания
     //Функционала обобщенного сервиса
-    User getData(int id);
+    User getUser(int id);
 
-    User updateData(User entity);
+    User updateUser(User user);
 
     List<User> getAll();
 
@@ -21,7 +21,7 @@ public interface UserService {
 
     void removeFriend(int userId, int friendId);
 
-    List<User> getFriends(int id);
+    List<User> getUserFriends(int id);
 
     List<User> getMutualFriends(int userId, int otherId);
 }
