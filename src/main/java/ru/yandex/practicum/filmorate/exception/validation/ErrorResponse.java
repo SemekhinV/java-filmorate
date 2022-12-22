@@ -1,14 +1,19 @@
 package ru.yandex.practicum.filmorate.exception.validation;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class ErrorResponse {
 
     private final String fieldName;
     private final String message;
 
+    public ErrorResponse (String message) {
+        this.fieldName = "";
+        this.message = message;
+    }
 }
 

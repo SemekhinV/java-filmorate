@@ -2,57 +2,51 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.entity.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
 
-import java.util.Collection;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import ru.yandex.practicum.filmorate.entity.Film;
+import ru.yandex.practicum.filmorate.service.films.FilmService;
+
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
-@Component
 @RequiredArgsConstructor
+@Validated
 public class FilmController {
 
     private final FilmService service;
 
     @PostMapping()
-    public Film postFilm(@RequestBody Film film) {
+    public Film postFilm(@RequestBody @Valid Film film) {
 
         log.info("Post new film - {}", film);                 //Логирование
 
-        return service.addData(film);
+        return service.addFilm(film);
     }
 
     @GetMapping("/{filmId}")
     public Film getFilmById(@PathVariable int filmId) {
 
         log.info("Запрос на получение данных фильма с id = {}", filmId);
-        return service.getData(filmId);
-    }
-
-    @DeleteMapping
-    public Film deleteFilmById(@RequestBody Film film) {
-
-        log.info("Удаление фильма filmId = {}, filmData = {}", film.getId(), film);
-
-        return service.removeData(film);
+        return service.getFilm(filmId);
     }
 
     @PutMapping()
-    public Film putFilm(@RequestBody Film film) {
+    public Film putFilm(@RequestBody @Valid Film film) {
 
         log.info("Put new film - {}", film);                 //Логирование
 
-        return service.updateData(film);
+        return service.updateFilm(film);
     }
 
     @GetMapping
-    public Collection<Film> getFilms() {
-        return service.getAll().values();
+    public List<Film> getFilms() {
+        return service.getAll();
     }
 
     @PutMapping("{id}/like/{userId}")
