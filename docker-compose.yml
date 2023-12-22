@@ -1,0 +1,22 @@
+version: '3.1'
+services:
+  film-server:
+    build: ./film/film-server
+    container_name: film-server
+    ports:
+      - "9090:9090"
+    depends_on:
+      - stats-db
+    environment:
+      - POSTGRES_USER=film
+      - POSTGRES_PASSWORD=film
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://film-db:5432/film
+
+  film-db:
+    image: postgres:14-alpine
+    ports:
+      - "9091:5432"
+    environment:
+      - POSTGRES_DB=film
+      - POSTGRES_USER=film
+      - POSTGRES_PASSWORD=film
