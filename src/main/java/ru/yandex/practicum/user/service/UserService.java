@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface UserService {
 
-    void save(UserDto entity);
+    UserDto save(UserDto entity);
 
     UserDto getById(Long id);
 

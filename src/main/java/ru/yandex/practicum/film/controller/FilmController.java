@@ -22,11 +22,11 @@ public class FilmController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void save(@Valid @RequestBody FilmDto film) {
+    public FilmDto save(@Valid @RequestBody FilmDto film) {
 
         log.info("Post new film - {}", film);
 
-        filmService.save(film);
+        return filmService.save(film);
     }
 
     @PutMapping("/{filmId}")
@@ -40,7 +40,7 @@ public class FilmController {
     @GetMapping("/{filmId}")
     public FilmDto getById(@PathVariable Long filmId) {
 
-        log.info("Запрос на получение данных пользователя с id = {}", filmId);
+        log.info("Запрос на получение данных о фильме с id = {}", filmId);
 
         return filmService.getById(filmId);
     }
@@ -49,7 +49,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable Long filmId) {
 
-        log.info("Удаление пользователя filmId = {}", filmId);
+        log.info("Удаление фильма filmId = {}", filmId);
 
         filmService.delete(filmId);
     }

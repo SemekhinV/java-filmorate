@@ -22,11 +22,11 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void save(@Valid @RequestBody UserDto user) {
+    public UserDto save(@Valid @RequestBody UserDto user) {
 
         log.info("Post new user - {}", user);
 
-        userService.save(user);
+        return userService.save(user);
     }
 
     @PutMapping("/{userId}")
@@ -55,11 +55,11 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable("id") Long userId, @PathVariable Long friendId) {
+    public UserDto addFriend(@PathVariable("id") Long userId, @PathVariable Long friendId) {
 
         log.info("Пользователю userId = {} добавлен новый друг с friendId = {}", userId, friendId);
 
-        userService.addFriend(userId, friendId);
+        return userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")

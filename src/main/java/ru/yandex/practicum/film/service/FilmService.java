@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface FilmService {
 
-    void save(FilmDto entity);
+    FilmDto save(FilmDto entity);
 
     FilmDto getById(Long id);
 

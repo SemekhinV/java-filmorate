@@ -8,6 +8,7 @@ import ru.yandex.practicum.user.entity.Friend;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -33,4 +34,14 @@ public class UserDto {
     private LocalDate birthday;
 
     private List<Friend> friends;
+
+    public void addFriend(Friend friend) {
+
+        if (this.friends == null) {
+
+            this.friends = new ArrayList<>();
+        }
+
+        this.friends.add(friend);
+    }
 }

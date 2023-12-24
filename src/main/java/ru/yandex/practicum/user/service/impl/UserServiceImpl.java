@@ -23,9 +23,9 @@ public class UserServiceImpl implements UserService {
     private final UserMapper mapper;
 
     @Override
-    public void save(UserDto user) {
+    public UserDto save(UserDto user) {
 
-        repository.save(mapper.toEntity(user));
+        return mapper.toDto(repository.save(mapper.toEntity(user)));
     }
 
     @Override
@@ -69,7 +69,11 @@ public class UserServiceImpl implements UserService {
                     throw new EntityExistException("User with id = " + id + "not found.");
                 });
 
-        return mapper.toDto(user);
+        var response = mapper.toDto(user);
+
+        response.setFriends(friendRepository.getAllByUserId(id));
+
+        return response;
     }
 
     @Override
@@ -96,9 +100,13 @@ public class UserServiceImpl implements UserService {
                     throw new EntityExistException("User with id = " + friendId + "not found.");
                 });
 
-        friendRepository.save(new Friend(null, friendId, user));
+        var newfriend = friendRepository.save(new Friend(null, friendId, user));
 
-        return mapper.toDto(repository.save(user));
+        var response =  mapper.toDto(repository.save(user));
+
+        response.addFriend(newfriend);
+
+        return response;
     }
 
     @Override

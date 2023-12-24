@@ -29,16 +29,11 @@ public class FilmServiceImpl implements FilmService {
     private final LikeRepository likeRepository;
 
     @Override
-    public void save(FilmDto dto) {
-
-        if (repository.existsById(dto.getId())) {
-
-            throw new EntityExistException("Entity with id = " + dto.getId() + "already exist");
-        }
+    public FilmDto save(FilmDto dto) {
 
         var film = repository.save(mapper.toEntity(dto));
 
-        mapper.toDto(film);
+        return mapper.toDto(film);
     }
 
     @Override
@@ -49,7 +44,11 @@ public class FilmServiceImpl implements FilmService {
                     throw new EntityExistException("Entity with id = " + id + "does`t exist");
                 });
 
-        return mapper.toDto(film);
+        var response = mapper.toDto(film);
+
+        response.addLike(likeRepository.findAllByFilmId(id));
+
+        return response;
     }
 
     @Override

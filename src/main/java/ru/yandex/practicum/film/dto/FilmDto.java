@@ -7,10 +7,10 @@ import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.yandex.practicum.film.entity.Like;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -18,10 +18,9 @@ import java.util.List;
 @AllArgsConstructor
 public class FilmDto {
 
-    @Min(value = 0, message = "Id должен быть больше, либо равен нулю.")
     Long id;
 
-    @Positive(message = "Продлжительность должна быть положительной.")
+    @Positive(message = "Продолжительность должна быть положительной.")
     int duration;
 
     @NotBlank(message = "Имя фильма не может быть пустым.")
@@ -38,4 +37,22 @@ public class FilmDto {
     String genre;
 
     String MPA;
+
+    public void addLike(Like like) {
+
+        if (this.likes == null) {
+            this.likes = new ArrayList<>();
+        }
+
+        this.likes.add(like);
+    }
+
+    public void addLike(List<Like> like) {
+
+        if (this.likes == null) {
+            this.likes = new ArrayList<>();
+        }
+
+        this.likes.addAll(like);
+    }
 }
