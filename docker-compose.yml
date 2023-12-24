@@ -1,12 +1,12 @@
 version: '3.1'
 services:
   film-server:
-    build: ./film/film-server
+    build: ./
     container_name: film-server
     ports:
-      - "9090:9090"
+      - "8080:8080"
     depends_on:
-      - stats-db
+      - film-db
     environment:
       - POSTGRES_USER=film
       - POSTGRES_PASSWORD=film
@@ -15,7 +15,7 @@ services:
   film-db:
     image: postgres:14-alpine
     ports:
-      - "9091:5432"
+      - "5432:5432"
     environment:
       - POSTGRES_DB=film
       - POSTGRES_USER=film
